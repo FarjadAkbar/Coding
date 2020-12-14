@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Api With Html</title>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+
+</head>
+<body>
+
+<div class="container m-5">
+    <div class="row">
+        <div class="col-md-12 offset-3">
+            <table class="table table-bordered" id="st_table">
+                <tr>
+                    <td id="header">
+                        <h1>Php Crud With Html</h1>
+                        <!-- <div id="serach-bar" class="col-md-3">
+                            <label>Search:</label>
+                            <input type="text" class="form-control" id="search" autocomplete="off">
+                        </div> -->
+                    </td>
+                </tr>
+                <tr>
+                    <td id="table-form">
+                        <form id="addform">
+                            
+                                <div class="form-group col-sm-3">
+                                <label for="sname" class="col-sm-2 col-form-label">Name</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="sname" id="sname">
+                                </div>
+                                </div>
+
+                                <div class="form-group col-sm-3">
+                                <label for="sage" class="col-sm-2 col-form-label">Age</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="sage" id="sage">
+                                </div>
+                                </div>
+
+                                <div class="form-group col-sm-3">
+                                <label for="scity" class="col-sm-2 col-form-label">City</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="scity" id="scity">
+                                </div>
+                                </div>
+                            
+                                <div class="form-group col-md-3">
+                                <div class="col-sm-10">                                    
+                                    <input type="submit" class="btn btn-primary" name="save-button" id="save-button" value="save">
+                                </div>
+                                </div>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td id="table-data">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Age</th>
+                                <th scope="col">City</th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="load-data">
+                                
+                            </tbody>
+                            </table>               
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+  
+  
+<!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"><strong>Update</strong></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="editform">                        
+                <div class="form-group row">
+                <label for="sname" class="col-sm-2 col-form-label">Name</label>
+                <div class="col-sm-10">
+                    <input type="hidden" class="form-control" name="sid" id="editid">
+                    <input type="text" class="form-control" name="sname" id="editname">
+                </div>
+                </div>
+
+                <div class="form-group row">
+                <label for="sage" class="col-sm-2 col-form-label">Age</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" name="sage" id="editage">
+                </div>
+                </div>
+
+                <div class="form-group row">
+                <label for="scity" class="col-sm-2 col-form-label">City</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" name="scity" id="editcity">
+                </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="save-changes">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+      $(document).ready(function(){
+        //fetch data
+        function loaddata(){
+            $("#load-data").html("");
+            $.ajax({
+            url:'http://localhost:8080/Phpfiles/RestApi/api_fetch_all.php',
+            type:"GET",
+            success:function(data){                
+                // console.log(data);  
+                if(data.status== false){
+                    $("#load-data").append("<tr><td colspan='6'><h2>"+data.message+"</h2></td></tr>");
+                }                       
+                else{
+                    $.each(data,function(key,value){
+                        $("#load-data").append("<tr>"
+                                                    + "<td>"+value.id+"</td>" 
+                                                    + "<td>"+value.name+"</td>" 
+                                                    + "<td>"+value.age+"</td>" 
+                                                    + "<td>"+value.city+"</td>" 
+                                                    + "<td><button type='button' class='btn btn-primary' data-toggle='modal' id='edit' data-eid='"+value.id+"' data-target='#exampleModal'>edit</button></td>" 
+                                                    + "<td><button type='button' class='btn btn-danger' id='delete' data-did='"+value.id+"'>delete</button></td>"  +
+                                                 "</tr>");
+                        });
+                    }
+                    
+                    $("#st_table").DataTable();
+                }
+                
+            });
+        }
+        loaddata();
+
+        //convert form data to json object
+        function jsonData(targetForm){
+            var arrary=$(targetForm).serializeArray();
+            var obj={};
+            for (var a = 0; a < arrary.length; a++){
+                if(arrary[a].value == ""){
+                    return false;
+                }
+                else{
+                    obj[arrary[a].name]=arrary[a].value;
+                }
+            }
+            var json_string=JSON.stringify(obj);
+            return json_string;
+        }
+        
+        //insert
+        $("#save-button").on("click",function(e){
+            e.preventDefault();
+            var jsonObj=jsonData("#addform");
+            
+            if(jsonObj == false){
+                alert("All Fields Are Required");   
+            }
+            else{
+                $.ajax({
+                    url:'http://localhost:8080/Phpfiles/RestApi/api_create.php',
+                    type:"POST",
+                    data:jsonObj,
+                     success:function(data){        
+                        alert(data.message);
+                        loaddata();
+                        $("#addform").trigger("reset"); 
+                }
+              });
+            }
+        });
+
+         //edit
+         $(document).on("click","#edit",function(){
+            var stid=$(this).data("eid");
+            var obj={sid:stid};
+            var myJson=JSON.stringify(obj);
+            // console.log(myJson);
+            $.ajax({
+                url:'http://localhost:8080/Phpfiles/RestApi/api_fetch_single.php',
+                type:"POST",
+                data:myJson,
+                success:function(data){
+                    $("#editid").val(data.id);
+                    $("#editname").val(data.name);
+                    $("#editage").val(data.age);
+                    $("#editcity").val(data.city);
+                }
+            });
+        });
+
+        $("#save-changes").on("click",function(e){
+            e.preventDefault();
+            var jsonObj=jsonData("#editform");
+            
+            if(jsonObj == false){
+               alert("All Fields Are Required"); 
+            }
+            else{
+                $.ajax({
+                    url:'http://localhost:8080/Phpfiles/RestApi/api_update.php',
+                    type:"POST",
+                    data:jsonObj,
+                    success:function(data){ 
+                        alert(data.message);      
+                        console.log(data.message);
+                        $("#exampleModal .close").click();
+                        loaddata();
+                        $("#editform").trigger("reset");                                                                        
+                    }
+              });
+            }            
+        });
+
+        //delete
+        $(document).on("click","#delete",function(){
+            if(confirm("Do you really want to delete this?")){
+                var stid=$(this).data("did");
+                var obj={sid:stid};
+                var myJson=JSON.stringify(obj);
+                
+                var row=this;
+                $.ajax({
+                    url:'http://localhost:8080/Phpfiles/RestApi/api_delete.php',
+                    type:"POST",
+                    data:myJson,
+                    success:function(data){           
+                        $(row).closest("tr").fadeOut();
+                        alert(data.message);                        
+                    
+                    }
+                });   
+             }            
+            });
+                
+        //search        
+        $("#search").keyup(function(){
+            var search_name=$(this).val();
+            $("#load-data").html("");
+            
+            $.ajax({
+                    url:'http://localhost:8080/Phpfiles/RestApi/api_search.php?search=' + search_name,
+                    type:"GET",
+                    success:function(data){                        
+                        if(data.status != false){
+                            $.each(data,function(key,value){
+                                $("#load-data").append("<tr>"
+                                                        + "<td>"+value.id+"</td>" 
+                                                        + "<td>"+value.name+"</td>" 
+                                                        + "<td>"+value.age+"</td>" 
+                                                        + "<td>"+value.city+"</td>" 
+                                                        + "<td><button type='button' class='btn btn-primary' data-toggle='modal' id='edit' data-eid='"+value.id+"' data-target='#exampleModal'>edit</button></td>" 
+                                                        + "<td><button type='button' class='btn btn-danger' id='delete' data-did='"+value.id+"'>delete</button></td>"  +
+                                                        "</tr>");
+                                });
+                            }
+                        else{                            
+                            $("#load-data").append("<tr><td colspan='6'><h2>"+data.message+"</h2></td></tr>");
+                        }                         
+                    }                        
+              });               
+         });
+
+         //serach with post method
+        // $("#search").keyup(function(){
+        //     $("#load-data").html("");
+        //     var search_name=$(this).val();
+        //     var expression=new RegExp(search_name,"i");
+        //     $.getJSON('api_search.php',function(data){
+        //         $.each(data,function(key,value){
+        //             if(value.name.search(expression) !=-1){
+        //                 $("#load-data").append("<tr>"
+        //                                 + "<td>"+value.id+"</td>" 
+        //                                 + "<td>"+value.name+"</td>" 
+        //                                 + "<td>"+value.age+"</td>" 
+        //                                 + "<td>"+value.city+"</td>" 
+        //                                 + "<td><button type='button' class='btn btn-primary' data-toggle='modal' id='edit' data-eid='"+value.id+"' data-target='#exampleModal'>edit</button></td>" 
+        //                                 + "<td><button type='button' class='btn btn-danger' id='delete' data-did='"+value.id+"'>delete</button></td>"  +
+        //                                 "</tr>");
+        //             }                
+        //         });
+        //     });
+        // });
+
+       });
+
+</script>
+</body>
+</html>
